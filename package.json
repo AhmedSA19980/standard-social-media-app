@@ -11,5 +11,11 @@
   },
   "devDependencies": {
     "husky": "^7.0.0"
+  },
+  "lint-staged":{
+      "**/*/*.{js,jsx,ts,tsx}":[
+          "yarn eslint",
+          "yarn test"
+      ]
   }
 }
