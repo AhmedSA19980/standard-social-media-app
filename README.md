@@ -14,3 +14,5 @@ You can initialize this repository with code from a Subversion, Mercurial, or TF
 
 
 branch name : test1
+
+# build Standard social medial app
