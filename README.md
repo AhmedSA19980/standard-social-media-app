@@ -16,3 +16,9 @@ You can initialize this repository with code from a Subversion, Mercurial, or TF
 branch name : test1
 
 # build Standard social medial app
+
+feature:
+
+1- User Account(U,D)
+2- Post (U,D)
+3- add comment to Post
