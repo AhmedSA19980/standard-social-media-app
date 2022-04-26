@@ -17,8 +17,21 @@ branch name : test1
 
 # build Standard social medial app
 
-feature:
+# feature:
 
-1- User Account(U,D)
-2- Post (U,D)
-3- add comment to Post
+U shortCut for Update
+D shortcut for Delete
+
+1. - [x]  User Account(U , D) 
+2. - [] Post (U,D)
+3. - [] add comment to Post []
+4. - [] A user has a profile []
+
+
+## Stacks
+
+| First Header  | Second Header |
+| ------------- | ------------- |
+| Back-end  | [nodejs,express, Redis , Postgress , tyepgraphql]  |
+| front-end  | nextjs |
+
