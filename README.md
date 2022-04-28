@@ -14,3 +14,5 @@ You can initialize this repository with code from a Subversion, Mercurial, or TF
 
 
 branch name : test1
+
+if you face a problem like can't find module @plugin/typescript-cjs  , remove [plugin] from(yarnc.yml ) and then  runn yarn plugin import typescript

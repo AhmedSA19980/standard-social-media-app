@@ -2,7 +2,8 @@
 /* eslint-disable react/jsx-no-comment-textnodes */
 import { Formik, Field, Form, FormikHelpers, ErrorMessage } from "formik";
 import { Button } from "../common/Btn";
-import {IsLoggedDocument, IsLoggedQuery, RegisterMutation, useRegisterMutation} from '../generated/graphql'
+import {IsLoggedDocument, IsLoggedQuery,
+   RegisterMutation, useRegisterMutation} from '../generated/graphql'
 
 import { __InputValue } from "graphql";
 import React, { useState } from "react";
@@ -30,8 +31,19 @@ export const Register = ({}) => {
               password: values.password,
               email: values.email,
             },
-             refetchQueries:[{query:IsLoggedDocument}]
+             //refetchQueries:[{query:IsLoggedDocument}]
+             update:(cache,{data})=>{
+               cache.writeQuery<IsLoggedQuery>({
+                 query:IsLoggedDocument,
+                 data:{
+                   __typename:"Query",
+                   isLogged:data?.register.user
+                 }
+               })
+             }
           });
+
+
           console.log(res);
           //alert(JSON.stringify(values, null, 2));
           // console.log(values);

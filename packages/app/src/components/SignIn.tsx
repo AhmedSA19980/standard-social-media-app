@@ -25,8 +25,19 @@ export const SignIn = ({}) => {
               userNameOrEmail: values.userNameOrEmail,
               password: values.password,
             },
-            refetchQueries:[{query:IsLoggedDocument}]
-          });
+            //refetchQueries:[{query:IsLoggedDocument}]
+
+            update:(cache ,{data})=>{
+              cache.writeQuery<IsLoggedQuery>({
+                query:IsLoggedDocument,
+                data:{
+                  __typename:"Query",
+                  isLogged:data?.login.user
+                }
+              })
+            }
+          })
+
           if (res.data?.login.errors) {
             setErrors(ErrorMap(res.data.login.errors));
           }else if(res.data?.login.user){

@@ -2,13 +2,18 @@
 import React from "react";
 import  NextLink  from "next/link";
 import classNames from "classnames";
-import { IsLoggedComponent, IsLoggedDocument, IsLoggedQuery, LoginDocument, LogoutComponent, LogoutDocument, useIsLoggedQuery } from "../generated/graphql";
+import { IsLoggedComponent, IsLoggedDocument, IsLoggedQuery, 
+  LoginDocument, 
+  LogoutComponent, LogoutDocument,
+   useIsLoggedQuery } from "../generated/graphql";
+
 import { useLogoutMutation } from "../generated/graphql";
 import { useApolloClient } from "@apollo/client";
 import styles from "./style/Navbar.module.css";
 import { ApolloClient } from "apollo-boost";
 import { logOutGraph } from "../graphql/mutation/logout";
 import { Button } from "../common/Btn";
+import { useRouter } from "next/router";
 
 
 // eslint-disable-next-line react/display-name
@@ -33,12 +38,13 @@ import { Button } from "../common/Btn";
     )
  }*/
 
- interface NavBarProps {}
+interface NavBarProps {}
 export const Navbar =()=>{
+  const route  =useRouter()
 
-  const [logoutmutation, { reset ,loading:f }] = useLogoutMutation();
+  const [logout, { client ,loading:f }] = useLogoutMutation();
     const {data,loading, error, } = useIsLoggedQuery()
-  const apolloClient = useApolloClient();
+ // const apolloClient = useApolloClient();
     let body = null
      
     if(loading){
@@ -50,7 +56,28 @@ export const Navbar =()=>{
           </div>
         );
     }
-    if(!data?.isLogged?.userName){
+    
+    else if (data?.isLogged?.userName) {
+      body = (
+        <div>
+          <h3 style={{ textAlign: "center" }}>
+            user:{data.isLogged.userName}</h3>
+          <Button
+            onClick={async () => {
+              await logout();
+              await client.resetStore();
+              await route.push("/");
+
+              // await apolloClient.resetStore();
+
+              //window.location.reload()
+            }}
+            //loading={data}
+            value={"logout"}
+          ></Button>
+        </div>
+      );
+    }else {
       body = (
         <div>
           <NextLink href={"/registerPage"}>
@@ -61,41 +88,11 @@ export const Navbar =()=>{
           </NextLink>
         </div>
       );
-    }else{
-     body = (
-       <div>
-         <h3 style={{ textAlign: "center" }}>user:{data.isLogged.userName}</h3>
-         <Button
-           onClick={async () => {
-           
-              
-                await logoutmutation({
-                  update: (cache, { data }) => {
-                  
-                    cache.writeQuery<IsLoggedQuery>({
-                      query: IsLoggedDocument,
-                      data: {
-                        isLogged: null
-                      },
-                    });
-                  },
-                });
-           // await apolloClient.resetStore();
-            await localStorage.clear();
-            //window.location.reload()
-          
-          }}
-           //loading={data}
-           value={"logout"}
-         ></Button>
-         
-       </div>
-     );
-    }
 
-  
+      }
     return (
       <div>
+        navbar
         {body}
       </div>
     );

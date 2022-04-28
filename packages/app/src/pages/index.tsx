@@ -7,6 +7,8 @@ import { ChakraProvider } from "@chakra-ui/react";
 import  {Register }  from "../components/Register";
 import { SignIn } from '../components/SignIn';
 import { Navbar } from '../common/Navbar';
+import { PostList } from '../components/postList/postList';
+import { CreatePost } from '../components/posts/createCase';
 
 import { Post } from '../components/posts/post';
 export const  Home = () =>{
@@ -27,7 +29,7 @@ export const  Home = () =>{
         </h1>
          </main>*/}
       
-    
+       <CreatePost />
 
       <footer className={styles.footer}>
         {/*<a

@@ -1,12 +1,11 @@
 node_modules
 
-
 .env
 .next
 storybook-static
 
 
-packages/api/build
+
 f.js
 f.ts
 s.js

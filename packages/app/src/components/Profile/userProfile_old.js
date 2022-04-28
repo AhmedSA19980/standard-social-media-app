@@ -1,4 +1,4 @@
-import React from "react";
+//import React from "react";
 import ProfileHeader from "./userProfileHeader";
 import styles from'../../styles/Home.module.css'
 import EditProfileModel from "../../modules/users/EditProfileModel";
@@ -19,7 +19,7 @@ const style = {
 }
 
 import Image from "next/image";
-export default function UserProfile({user}) {
+export default function userProfil({user}) {
 
     return(<div className={'container'} style={{'textAlign':'center'}}>
         <h1 style={{'textAlign':'center'}}>user profile page</h1>

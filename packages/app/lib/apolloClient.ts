@@ -1,32 +1,34 @@
+"http://localhost:4000/graphql"
+
+
 import { useMemo } from "react";
-import { ApolloClient, HttpLink,createHttpLink, InMemoryCache, NormalizedCacheObject } from "@apollo/client";
+import { ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject } from "@apollo/client";
 import { concatPagination } from "@apollo/client/utilities";
-import {Request} from 'express'
 import merge from "deepmerge";
 import isEqual from "lodash/isEqual";
 
-
-
 export const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
 
-let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
+let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 function createApolloClient() {
   return new ApolloClient({
-   // ssrMode:true, //typeof window === "undefined",
+    ssrMode: typeof window === "undefined",
     link: new HttpLink({
       uri: "http://localhost:4000/graphql", // Server URL (must be absolute)
       credentials: "include", // Additional fetch() options like `credentials` or `headers`
-      /*headers:{
-        cookie:req.header("Cookie")
-      }*/
     }),
     cache: new InMemoryCache({
-    
-     typePolicies: {
+      typePolicies: {
         Query: {
-         
-          keyFields:[ "userName", "email" ]
+          fields: {
+            posts: {
+              keyArgs: [],
+              merge(existing, incoming) {
+                return { ...existing, ...incoming };
+              },
+            },
+          },
         },
       },
     }),
@@ -42,8 +44,8 @@ export function initializeApollo(initialState = null) {
     // Get existing cache, loaded during client side data fetching
     const existingCache = _apolloClient.extract();
 
-    // Merge the initialState from getStaticProps/getServerSideProps in the existing cache
-    const data = merge(existingCache, initialState, {
+    // Merge the existing cache into data passed from getStaticProps/getServerSideProps
+    const data = merge(initialState, existingCache, {
       // combine arrays using object equality (like in sets)
       arrayMerge: (destinationArray, sourceArray) => [
         ...sourceArray,
