@@ -13,6 +13,6 @@ git push -u origin main
 You can initialize this repository with code from a Subversion, Mercurial, or TFS project.
 
 
-branch name : test1
+branch name : main
 
 if you face a problem like can't find module @plugin/typescript-cjs  , remove [plugin] from(yarnc.yml ) and then  runn yarn plugin import typescript
