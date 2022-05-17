@@ -1,7 +1,7 @@
 import { Profile } from "../../entity/profile";
 import { Resolver, Query,
    ObjectType, Field 
-   ,PubSub, Publisher, Subscription, Root, Args, FieldResolver } from "type-graphql";
+   ,PubSub, Publisher, Subscription, Root, Args, FieldResolver, UseMiddleware } from "type-graphql";
 import { Mutation ,Arg ,Ctx ,Int  } from "type-graphql";
 import { AddCommentInput } from "./inputTypes/AddcommentInput";
 import { MyContext } from "@src/types";
@@ -15,7 +15,7 @@ import { editCommentInput } from "./inputTypes/editCommentInput";
 import { random } from "lodash";
 import { NewCommentsArgs } from "./inputTypes/args/common-args";
 import { commentPayload } from "./inputTypes/comment-Field";
-
+import {isAuth} from "../../middleware/isAuth"
 
 interface commentSub {
   commentId:number,
@@ -59,6 +59,7 @@ export class commentResolver {
   //* write comment
 
   @Mutation(() => Comment)
+  @UseMiddleware(isAuth)
   async createComment(
     @Arg("option") { postId, writeAComment }: AddCommentInput,
     @PubSub(Topic.newComment)
@@ -66,24 +67,30 @@ export class commentResolver {
     @Ctx() { req }: MyContext
   ): Promise<Comment> {
     const userId = req.session.userId;
-    const user = User.findOne({where:{id:req.session.userId}});
+    const author = await User.findOne({
+      relations: ["allUserComments"],
+      where: { id: req.session.userId },
+    });
     const getpost = await Post.findOne(postId, {
       relations: ["author", "comments"],
     });
 
-    if ((await user) && getpost) {
+    if ( author && getpost) {
       let com = await Comment.create({
         writeAComment,
         getpost: getpost,
         authorId: userId,
+        author:author,
+        
       }).save();
       //console.log("new subscription|pending",notifyAboutNewComment({pos}));
       getpost.comments?.push(com)
-      await notifyAboutNewComment({post:com.getpost
+
+      /*await notifyAboutNewComment({post:com.getpost
       ,user:com.authorId as any,
       comment:com.writeAComment
 
-    }).catch(err=>console.log(err));
+    }).catch(err=>console.log(err));*/
 
       return com;
     }
@@ -93,18 +100,27 @@ export class commentResolver {
 
   //* edit comment
   @Mutation(() => Comment)
+  @UseMiddleware(isAuth)
   async editComment(
     @Arg("option") { commentId, editComment }: editCommentInput,
     @Ctx() { req }: MyContext
   ): Promise<Comment> {
     // find post
     // find comment
-    const userId = req.session.userId;
-    const user = await User.findOne(userId);
-    const post = await Post.findOne({ where: { id: userId } });
-    let comm = await Comment.findOne(commentId);
+    //const userId = req.session.userId;
+    const author = await User.findOne( {
+      relations: ["allUserComments"],
+      where: { id: req.session.userId }});
 
-    if (user && comm) {
+     const post = await Post.findOne({ 
+      relations: ["author", "comments"],
+     });
+    let comm = await Comment.findOne({
+      where: { id: commentId },
+      relations: ["author", "getpost"],
+    });
+
+    if (author?.id === comm?.authorId && comm) {
       comm.writeAComment = editComment;
       await comm.save();
       return comm;
@@ -113,15 +129,20 @@ export class commentResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
   async deleteComment(
     @Arg("commentId") commentId: number,
     @Ctx() { req }: MyContext
   ): Promise<Boolean> {
-    const user = await User.findOne(req.session.userId);
-    const comment = await Comment.findOne(commentId, {
-      where: { author: user },
+    const author = await User.findOne({
+      relations: ["allUserComments"],
+      where: { id: req.session.userId },
     });
-    if (user && comment) {
+    const comment = await Comment.findOne({
+      where: { id: commentId },
+      relations: ["author", "getpost"],
+    });
+    if (author?.id == comment?.authorId && comment) {
       await Comment.delete(comment);
       return true;
     }

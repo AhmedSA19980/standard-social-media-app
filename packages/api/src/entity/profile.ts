@@ -20,7 +20,11 @@ import {Field, ID, ObjectType} from 'type-graphql'
 export class Profile extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
-  id!: number;
+  readonly id!: number;
+
+  @Field(() => ID)
+  @Column( {nullable: true } )
+  profileOwner!: number;
 
   @Field()
   @Column("text", {
@@ -29,24 +33,22 @@ export class Profile extends BaseEntity {
   profilePicture!: string; //* => file name
 
   @Field((type) => String)
-  @Column()
+  @Column({ nullable: true })
   bio?: string;
 
-  @Field()
-  @Column("text", { default: "Male" })
-  gender?: "Male" | "Female";
+  @Field(() => String)
+  @Column({ nullable: true })
+  gender?: string;
 
- // @Field()
- /* @Column()
+  // @Field()
+  /* @Column()
   followers?: number;
 
   //@Field()
   @Column()
   following?: number ;  
   */
-  @Field(()=> [User]) 
-  @OneToOne(()=> User, user => user.Profile)
-  user!:User
-
-
+  @Field(() => User)
+  @OneToOne(() => User, (user) => user.Profile)
+  user!: User;
 } 

@@ -62,9 +62,11 @@ export class User extends BaseEntity {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
-  @Field(() => [Profile])
-  @OneToOne(() => Profile, (profile) => profile.user) //* => one user only have one porifle
-  @JoinColumn()
+  @Field(() => Profile)
+  @OneToOne(() => Profile, 
+  profile => profile.user,
+  {cascade:true}) //* => one user only have one porifle
+  @JoinColumn({name:"profile_id"})
   Profile!: Profile;
 
   //* privateMsg

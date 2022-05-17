@@ -20,24 +20,20 @@ import { isAuth } from "../../middleware/isAuth";
 import { sendEmail } from "../../utils/sendEmail";
 import { createConfirmationUrl } from "../../utils/createConfirmtionUrl";
 import { Post } from "@src/entity/post";
-
-@ObjectType()
-class FieldError {
-  @Field()
-  Field?: string;
-
-  @Field()
-  Message?: string;
-}
+import { FieldError } from "../types/validationFieldType";
+import { Profile } from "../../entity/profile";
 
 
 @ObjectType()
 class userResponse {
-  @Field(() => [FieldError],{nullable:true})
+  @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
-  @Field(() => User, { nullable:true })
+  @Field(() => User, { nullable: true })
   user?: User;
+
+  @Field(() => Profile, { nullable: true })
+  profile?: Profile;
 }
 
 
@@ -51,6 +47,30 @@ export class userResolver {
     }
     // current user wants to see someone elses email
     return "";
+  }*/
+
+  @FieldResolver(() => String)
+  async gender(@Root() profile: Profile, @Ctx() { req }: MyContext) {
+    if (req.session.userId === profile.profileOwner) {
+      return profile.gender;
+    }
+    return;
+  }
+
+  /*@FieldResolver(() => Profile)
+  async profile(
+    @Root() user: User,
+    @Ctx() { profileLoader }: MyContext
+  ): Promise<Profile> {
+    return profileLoader.load(user.id);
+  }*/
+
+ /* @FieldResolver(() => Profile)
+  async Owner(
+    @Root() user: Profile,
+    @Ctx() { userLoader, req}: MyContext
+  ) {
+    return userLoader.load(user.id);
   }*/
 
   //* Change PASS
@@ -143,7 +163,7 @@ export class userResolver {
   @Query(() => User, { nullable: true })
   //@UseMiddleware(isAuth)
   isLogged(@Ctx() { req }: MyContext) {
-    console.log("session:", req.session);
+    console.log("session:", req.session.userId);
     // you are not logged in
     if (!req.session.id) {
       //* =>
@@ -152,8 +172,6 @@ export class userResolver {
 
     return User.findOne(req.session.userId); //* =>
   }
-
- 
 
   @Query(() => [User], { nullable: true })
   users(@Ctx() { req }: MyContext): Promise<User[]> {
@@ -171,6 +189,7 @@ export class userResolver {
   @Mutation(() => userResponse)
   async register(
     @Arg("options") options: UserInput,
+    //@Arg("profile_Owner") profileOwner:number,
     @Ctx() { req, redis }: MyContext
   ): Promise<userResponse> {
     const errors = validateRegister(options);
@@ -179,6 +198,7 @@ export class userResolver {
     }
     const hashedPassword = await argon2.hash(options.password); //* =>
     let user;
+    let profile;
 
     try {
       //user = await User.create({...options}).save()
@@ -194,7 +214,20 @@ export class userResolver {
         })
         .returning("*")
         .execute();
+
       user = result.raw[0];
+
+        /*const profileUser = await getConnection()
+          .createQueryBuilder()
+          .insert()
+          .into(Profile)
+          .values({  profileOwner: profileOwner.user })
+          .returning("*")
+          .execute();
+
+        profile = profileUser;*/
+      
+
     } catch (err: any) {
       if (err.code === "23505") {
         return {
@@ -207,10 +240,17 @@ export class userResolver {
         };
       }
     }
+     req.session.userId = user.id;
+     
+      /*if (user) {
+        const profileUser = await Profile.create({
+          profileOwner: req.session.userId,
+        }).save();
+
+        profile = profileUser;
+      }*/
     // this will set a cookie on the user
     // keep them logged in
-
-    req.session.userId = user.id;
 
     const token = v4();
     await redis.set(token, user.id, "ex", 60 * 60); // 1 h expiration
@@ -218,6 +258,8 @@ export class userResolver {
 
     await sendEmail(options.email, url);
     console.log(sendEmail(options.email, url));
+
+  
 
     return { user };
   }

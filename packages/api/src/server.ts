@@ -81,6 +81,8 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import bodyParser from "body-parser";
 import { UserMessage } from "./entity/userMessages";
 import { Topic } from "./common/topics";
+import { createProfileDataLoader } from "./dataLoader/createProfileDataloader";
+import { createUserDataLoader } from "./dataLoader/createUserDataLoader";
 
 //const PORTJS:number = 4000
 export const startSR = async (msg: string) => {
@@ -165,7 +167,11 @@ export const startSR = async (msg: string) => {
      
     ],
 
-    context: ({ req, res }): MyContext => ({ req, res, redis: redisClient }),
+    context: ({ req, res }): MyContext => ({ 
+      req, res,
+      profileLoader:createProfileDataLoader(), 
+      userLoader:createUserDataLoader(),
+      redis: redisClient }),
   });
 
  
