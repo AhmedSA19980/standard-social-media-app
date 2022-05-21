@@ -4,7 +4,7 @@ import { User } from "../entity/user";
 export const createUserLoader =()=>
 new DataLoader<number,User>(async(userIds)=>{
   const users = await User.findByIds(userIds as number[]);
-  const userIdToUser:Record<number,User> ={}
+  const userIdToUser:Record<number ,User> ={}
    users.forEach((u)=>{
      userIdToUser[u.id]= u
    });

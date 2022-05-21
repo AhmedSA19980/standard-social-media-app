@@ -46,7 +46,8 @@ import { User } from "./entity/user";
 import { Profile } from "./entity/profile";
 import { Post } from "./entity/post";
 import { Comment } from "./entity/comment";
-import { T } from "./resolvers/trail";
+import { Like } from "./entity/like";
+import { T } from "./resolvers/trail"; 
 //import { keys } from "lodash";
 //import { findConfigFile } from "typescript";
 //import { Server } from "http";
@@ -83,6 +84,11 @@ import { UserMessage } from "./entity/userMessages";
 import { Topic } from "./common/topics";
 import { createProfileDataLoader } from "./dataLoader/createProfileDataloader";
 import { createUserDataLoader } from "./dataLoader/createUserDataLoader";
+import { Follow } from "./entity/follow";
+import { createFollowLoader } from "./dataLoader/createFollowLoader";
+import { FollowerResolver } from "./resolvers/follow/followResolver";
+import { createLikeLoader } from "./dataLoader/createLikeLoader";
+import { LikeResolver } from "./resolvers/like/likeResolver";
 
 //const PORTJS:number = 4000
 export const startSR = async (msg: string) => {
@@ -96,7 +102,11 @@ export const startSR = async (msg: string) => {
     password: "@@as##9999980",
     port: 5433,
     migrations: [path.join(__dirname, "./migration/*")],
-    entities: [User, Profile, Post, Comment, privateMessage,UserMessage],
+    entities: [User, Profile, Post, 
+      Comment, privateMessage,UserMessage,
+      Follow, Like
+    
+    ],
     synchronize: true,
     logger: "advanced-console",
     logging: "all",
@@ -133,7 +143,9 @@ export const startSR = async (msg: string) => {
         commentResolver,
         userProfileResolver,
         PrivateMessageMutationResolver,
-        PrivateMessageQueryResolver,      
+        PrivateMessageQueryResolver, 
+        FollowerResolver ,
+        LikeResolver    
       ],
        
       pubSub,
@@ -171,6 +183,8 @@ export const startSR = async (msg: string) => {
       req, res,
       profileLoader:createProfileDataLoader(), 
       userLoader:createUserDataLoader(),
+      followLoader:createFollowLoader(), 
+      likeLoader:createLikeLoader(),
       redis: redisClient }),
   });
 

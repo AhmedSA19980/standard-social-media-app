@@ -6,6 +6,8 @@ import session, {Session} from "express-session";
 import { Key } from "readline";
 import {createProfileDataLoader} from './dataLoader/createProfileDataloader'
 import { createUserDataLoader } from "./dataLoader/createUserDataLoader";
+import { createFollowLoader } from "./dataLoader/createFollowLoader";
+import { createLikeLoader } from "./dataLoader/createLikeLoader";
 
 
 declare module "express-session" {
@@ -22,7 +24,8 @@ export type MyContext = {
   res: Response;
   profileLoader: ReturnType<typeof createProfileDataLoader>;
   userLoader: ReturnType<typeof createUserDataLoader>;
-
+  followLoader: ReturnType<typeof createFollowLoader>;
+  likeLoader: ReturnType<typeof createLikeLoader>;
   //userLoader: ReturnType<typeof createUserLoader>;
   //updootLoader: ReturnType<typeof createUpdootLoader>;
 };  

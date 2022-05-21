@@ -51,17 +51,21 @@ export class Post extends BaseEntity {
   @Column({ nullable: true })
   postOwner!: number;
 
-  //@Field(()=> [Like])
-  //@OneToMany(() => Like, (like) => like.user)
-  /*@OneToMany(() => Like, (Like) => Like.user)
-  numOfLikes?: Like[];*/
   @Field(() => [Comment], { nullable: true })
   @OneToMany(() => Comment, (comm) => comm.getpost)
   comments?: Comment[];
 
+  @Field()
+  @Column({ default: 0 })
+  likeCount!: number;
+
+  @Field()
+  @Column({ default: 0 })
+  commentCount!: number;
+
   @Field(() => User)
   @ManyToOne(() => User, (post) => post.allUserPosts, {
-    cascade:["insert" ,"update" , "remove"],
+    cascade: ["insert", "update", "remove"],
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   }) //* a user can have many post
@@ -69,4 +73,7 @@ export class Post extends BaseEntity {
   author!: User;
   @RelationId((post: Post) => post.author)
   postBelongToUser!: number;
+
+  @OneToMany(() => Like, (like) => like.post) // bi-dirctional relationship
+  likes!: Like[];
 }

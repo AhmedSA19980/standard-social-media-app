@@ -11,6 +11,7 @@ import { Comment } from "../../entity/comment";
 import { postInput } from "./inputTypes/postInput";
 import EditPostInput from "../types/editPostInput";
 import { PostArgs } from "./inputTypes/post-args-types";
+import { BlobOptions } from "buffer";
 //import { commentInput } from "./types/commentInput";
 
 
@@ -71,7 +72,9 @@ export class postResolver {
   async post(@Arg("postId") postId: number, @Ctx() { req }: MyContext) {
     return await Post.findOne({
       relations: ["author"],
-      where: { id: postId, postOwner: req.session.userId }, //author: req.session.userId
+      where: { id: postId, postOwner: req.session.userId,
+       }, //author: req.session.userId
+      // select:["likeCount"]
     });
   }
 
@@ -87,6 +90,20 @@ export class postResolver {
   async author(@Root() post: Post) {
     const author = await User.findOne(post.author); //* check this out
     return author;
+  }
+
+  @FieldResolver(()=> Boolean)
+  async userLike(@Root() post:Post,
+   @Ctx(){req , likeLoader}:MyContext
+  ):Promise<boolean>{
+   
+    if(!req.session.userId) return false;
+
+    const like =  await likeLoader.load({
+      userId:req.session.userId ,
+      postId:post.id
+    });
+    return like ? true : false;
   }
 
   //* C POST

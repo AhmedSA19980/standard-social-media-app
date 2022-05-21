@@ -9,8 +9,6 @@ export class postInput {
   @Field()
   field!: string;
 
- 
-
   /*@Field()
   likes?: number ;
  */

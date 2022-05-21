@@ -19,7 +19,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
-import { ObjectType, Field,Int  } from "type-graphql";
+import { ObjectType, Field,Int, GraphQLISODateTime, ID  } from "type-graphql";
 
 
 import { User } from "./user";
@@ -29,22 +29,31 @@ import { Post } from "./post";
 
 
 @Entity()
-
+@ObjectType()
 export class Like extends BaseEntity {
+  @Field(()=> ID)
   @PrimaryGeneratedColumn()
-  readonly id!: number;
+  id!: number;
 
-  @Field(() => Int)
-  @Column({ type: "int" })
-  value!: number;
+ // @Field()
+  @Column()
+  postId!: number;
 
-  @Field(() => User) //* a user can have one like for each post
-  @ManyToOne(() => Post )
-  user!: User;
-  @JoinColumn({ name: "userId" })
+ // @Field()
+  @Column()
   userId!: number;
+  //* a user can have one like for each post
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "userId", referencedColumnName: "id" })
+  user!: User;
 
-  @Field()
-  @CreateDateColumn()
+  //  userId!: number;
+
+  @ManyToOne(() => Post, (post) => post.likes, { onDelete: "CASCADE" })
+  post!: Post;
+
+  /*@Field(() => GraphQLISODateTime)
+  @CreateDateColumn({ type: "timestamp" })
   date!: Date;
+  */
 }
