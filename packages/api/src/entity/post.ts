@@ -69,7 +69,7 @@ export class Post extends BaseEntity {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   }) //* a user can have many post
-  @JoinColumn({ name: "user_id" })
+  //@JoinColumn({ name: "user_id" , referencedColumnName:"id"})
   author!: User;
   @RelationId((post: Post) => post.author)
   postBelongToUser!: number;

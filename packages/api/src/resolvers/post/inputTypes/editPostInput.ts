@@ -1,7 +1,7 @@
 import { Field, Float, GraphQLISODateTime, ID, InputType, Int } from "type-graphql"
 
 @InputType()
-export default class EditPostInput {
+export  class EditPostInput {
   @Field(() => Int)
   postId?: number;
 

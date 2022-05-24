@@ -89,6 +89,7 @@ import { createFollowLoader } from "./dataLoader/createFollowLoader";
 import { FollowerResolver } from "./resolvers/follow/followResolver";
 import { createLikeLoader } from "./dataLoader/createLikeLoader";
 import { LikeResolver } from "./resolvers/like/likeResolver";
+import { createCommentLoader } from "./dataLoader/createCommentLoader";
 
 //const PORTJS:number = 4000
 export const startSR = async (msg: string) => {
@@ -185,6 +186,7 @@ export const startSR = async (msg: string) => {
       userLoader:createUserDataLoader(),
       followLoader:createFollowLoader(), 
       likeLoader:createLikeLoader(),
+      commentsLoader:createCommentLoader(),
       redis: redisClient }),
   });
 

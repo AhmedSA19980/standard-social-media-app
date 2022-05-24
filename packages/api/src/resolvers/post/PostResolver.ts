@@ -8,10 +8,14 @@ import { getConnection } from "typeorm";
 import { User } from "../../entity/user";
 import { isAuth } from "../../middleware/isAuth";
 import { Comment } from "../../entity/comment";
-import { postInput } from "./inputTypes/postInput";
-import EditPostInput from "../types/editPostInput";
+import { PostInput } from "./inputTypes/postInput";
+import {EditPostInput} from "./inputTypes/editPostInput";
 import { PostArgs } from "./inputTypes/post-args-types";
 import { BlobOptions } from "buffer";
+import { PostValidation } from "../validation/validatePost";
+import { FieldError } from "../types/validationFieldType";
+import { text } from "body-parser";
+import { validateEPost } from "../validation/validateEPost";
 //import { commentInput } from "./types/commentInput";
 
 
@@ -28,6 +32,9 @@ class AllPosts {
 
 @ObjectType()
 class PostMutationResponse {
+  @Field(() =>[ FieldError], { nullable: true })
+  errors?: FieldError[];
+
   @Field(() => Post, { nullable: true })
   post?: Post;
 
@@ -74,6 +81,7 @@ export class postResolver {
       relations: ["author"],
       where: { id: postId, postOwner: req.session.userId,
        }, //author: req.session.userId
+      // select:["commentCount"] 
       // select:["likeCount"]
     });
   }
@@ -110,7 +118,7 @@ export class postResolver {
   @Mutation(() => PostMutationResponse)
   @UseMiddleware(isAuth)
   async CreatePost(
-    @Arg("field") field: postInput,
+    @Arg("field") field: PostInput,
     @Ctx() { req }: MyContext
   ): Promise<PostMutationResponse> {
     const userId = req.session.userId;
@@ -119,7 +127,11 @@ export class postResolver {
       relations: ["allUserPosts"],
       where: { id: userId },
     });
+    const errors =  PostValidation(field)
 
+    if(errors){
+      return {errors}
+    }
 
     if (author) {
       const post = Post.create({
@@ -145,7 +157,8 @@ export class postResolver {
   @Mutation(() => Post)
   @UseMiddleware(isAuth)
   async editPost(
-    @Arg("data") { text, field, postId }: EditPostInput,
+    //{ text, field, postId }
+    @Arg("data") {postId , text, field}: EditPostInput,
     @Ctx() { req }: MyContext
   ): Promise<Post | null> {
    // const userId = req.session.userId;
@@ -157,6 +170,14 @@ export class postResolver {
       relations: ["author"],
       where: { id: postId, postOwner: req.session.userId },
     });
+     
+    const errors = validateEPost({postId, text})
+    /*if(errors){
+       return {errors}
+      };
+      */
+    
+   // const errors = PostValidation( )
     let result;
 
     if (!find) {

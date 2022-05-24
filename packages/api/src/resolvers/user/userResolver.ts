@@ -39,7 +39,7 @@ class userResponse {
 
 @Resolver(User)
 export class userResolver {
-  /* @FieldResolver(() => String)
+   @FieldResolver(() => String)
   email(@Root() user: User, @Ctx() { req }: MyContext) {
     // this is the current user and its ok to show them their own email
     if (req.session.userId === user.id) {
@@ -47,7 +47,7 @@ export class userResolver {
     }
     // current user wants to see someone elses email
     return "";
-  }*/
+  }
 
   @FieldResolver(() => String)
   async gender(@Root() profile: Profile, @Ctx() { req }: MyContext) {

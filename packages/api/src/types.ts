@@ -8,6 +8,7 @@ import {createProfileDataLoader} from './dataLoader/createProfileDataloader'
 import { createUserDataLoader } from "./dataLoader/createUserDataLoader";
 import { createFollowLoader } from "./dataLoader/createFollowLoader";
 import { createLikeLoader } from "./dataLoader/createLikeLoader";
+import { createCommentLoader } from "./dataLoader/createCommentLoader";
 
 
 declare module "express-session" {
@@ -26,6 +27,7 @@ export type MyContext = {
   userLoader: ReturnType<typeof createUserDataLoader>;
   followLoader: ReturnType<typeof createFollowLoader>;
   likeLoader: ReturnType<typeof createLikeLoader>;
+  commentsLoader: ReturnType<typeof createCommentLoader>;
   //userLoader: ReturnType<typeof createUserLoader>;
   //updootLoader: ReturnType<typeof createUpdootLoader>;
 };  

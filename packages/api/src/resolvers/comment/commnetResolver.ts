@@ -16,6 +16,8 @@ import { random } from "lodash";
 import { NewCommentsArgs } from "./inputTypes/args/common-args";
 import { commentPayload } from "./inputTypes/comment-Field";
 import {isAuth} from "../../middleware/isAuth"
+import { commentValidation } from "../validation/validateComment";
+import { FieldError } from "../types/validationFieldType";
 
 interface commentSub {
   commentId:number,
@@ -26,20 +28,34 @@ interface commentSub {
 
 @ObjectType()
 class commentMutationResponse {
-  @Field(() => Comment, {nullable:true})
-   comm?: Comment;
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
 
-  @Field(() => Post,{nullable:true})
+
+  @Field(() => Comment, { nullable: true })
+  commemt?: Comment;
+
+  @Field(() => Post, { nullable: true })
   getpost?: Post;
 }
 
 
 @Resolver(() => Comment)
 export class commentResolver {
-  @Query(() => Post, { nullable: true })
+  /* @Query(() => Post, { nullable: true })
   async postB(@Arg("postId") postId: number, @Ctx() { req }: MyContext) {
     return await Post.findOne({ where: { id: postId } });
+  }*/
+
+  @FieldResolver(() => User)
+  user(
+    @Root() comment: Comment,
+    @Ctx() { req, userLoader }: MyContext
+  ): Promise<User> {
+    return userLoader.load(comment.authorId as number);
   }
+
+
 
   @Query(() => [Comment])
   comments() {
@@ -64,34 +80,46 @@ export class commentResolver {
     @Arg("option") { postId, writeAComment }: AddCommentInput,
     @PubSub(Topic.newComment)
     notifyAboutNewComment: Publisher<commentPayload>,
-    @Ctx() { req }: MyContext
+    @Ctx() { req, commentsLoader }: MyContext
   ): Promise<Comment> {
     const userId = req.session.userId;
     const author = await User.findOne({
       relations: ["allUserComments"],
       where: { id: req.session.userId },
     });
-    const getpost = await Post.findOne(postId, {
+    const getpost = await Post.findOne({
+      where: { id: postId },
       relations: ["author", "comments"],
     });
 
-    if ( author && getpost) {
+    /* const errors = commentValidation()
+    if(errors){
+      return {errors}
+    }*/
+
+    if (author && getpost) {
       let com = await Comment.create({
         writeAComment,
         getpost: getpost,
         authorId: userId,
-        author:author,
-        
+        author: author,
       }).save();
       //console.log("new subscription|pending",notifyAboutNewComment({pos}));
-      getpost.comments?.push(com)
+      getpost.comments?.push(com);
 
+      const postRepeat = await Post.findOne({
+        where: { id: postId },
+        select: ["id", "commentCount"],
+      });
+      if (postRepeat) {
+        postRepeat.commentCount += 1;
+        await postRepeat.save();
+        commentsLoader.clear(postId);
+      }
       /*await notifyAboutNewComment({post:com.getpost
       ,user:com.authorId as any,
       comment:com.writeAComment
-
     }).catch(err=>console.log(err));*/
-
       return com;
     }
 
@@ -108,13 +136,14 @@ export class commentResolver {
     // find post
     // find comment
     //const userId = req.session.userId;
-    const author = await User.findOne( {
+    const author = await User.findOne({
       relations: ["allUserComments"],
-      where: { id: req.session.userId }});
+      where: { id: req.session.userId },
+    });
 
-     const post = await Post.findOne({ 
+    const post = await Post.findOne({
       relations: ["author", "comments"],
-     });
+    });
     let comm = await Comment.findOne({
       where: { id: commentId },
       relations: ["author", "getpost"],
@@ -132,7 +161,8 @@ export class commentResolver {
   @UseMiddleware(isAuth)
   async deleteComment(
     @Arg("commentId") commentId: number,
-    @Ctx() { req }: MyContext
+    //@Arg("postId") postId: number,
+    @Ctx() { req, commentsLoader }: MyContext
   ): Promise<Boolean> {
     const author = await User.findOne({
       relations: ["allUserComments"],
@@ -142,8 +172,18 @@ export class commentResolver {
       where: { id: commentId },
       relations: ["author", "getpost"],
     });
+    const post = await Post.findOne({
+      where: { id: 67 },
+      select: ["id", "commentCount"],
+    });
+
     if (author?.id == comment?.authorId && comment) {
-      await Comment.delete(comment);
+      await Comment.remove(comment);
+      if (post) {
+        post.commentCount -= 1;
+        await post.save(); // save post after changes ]
+        commentsLoader.clear(commentId);
+      }
       return true;
     }
 
@@ -159,8 +199,8 @@ export class commentResolver {
       console.log(payload);
       console.log("args");
       console.log(args);
-      payload:Comment;
-      args:NewCommentsArgs;
+      payload: Comment;
+      args: NewCommentsArgs;
       return payload.getpost === args.postId;
     },
   })
@@ -168,9 +208,9 @@ export class commentResolver {
     @Root() newComment: Comment,
     @Args() { postId }: NewCommentsArgs
   ): Comment {
-   if(postId && newComment){
-    return newComment;
-   }
-   throw new Error("erro r mu be ")
+    if (postId && newComment) {
+      return newComment;
+    }
+    throw new Error("erro r mu be ");
   }
 }

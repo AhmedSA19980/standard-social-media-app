@@ -2,12 +2,14 @@ import { InputType ,Field } from "type-graphql";
 
 
 @InputType()
-export class postInput {
+export class PostInput {
   @Field()
   text!: string;
 
   @Field()
   field!: string;
+
+  
 
   /*@Field()
   likes?: number ;
