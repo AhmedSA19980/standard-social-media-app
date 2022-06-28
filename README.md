@@ -36,13 +36,14 @@ D shortcut for Delete
 | front-end  | nextjs |
 
 ## bottlenecks
-| apollo server V2          |     apollo server V3          |
-| --------------------------|------------------------------ |
-| (file upoload) is  
- valnerable                | (file upload ) is not supported
-| Subscription-trasnport 
- library is not maintaining 
- anymore 
-to CSRF attack  | [nodejs,express, Redis , Postgress , tyepgraphql]  |
-| front-end  | nextjs |
-
+| apollo server V2                   |     apollo server V3          |
+| ---------------------------------- |------------------------------ |
+| (file upoload) is valnerable to | (file upload ) is not supported
+  CSRF attack                     
+| Subscription-trasnport-ws          | issues with integration(graphql-ws)
+ library is not maintaining          | Subscription-trasnport-ws(works)
+ anymore {but works}
+  
+# future Solution
+1- build file upload api
+2- add another file upload api "add more cost"
