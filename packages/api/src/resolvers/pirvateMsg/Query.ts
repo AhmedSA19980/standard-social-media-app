@@ -8,10 +8,10 @@ import { MyContext } from "../../types";
 export  class PrivateMessageQueryResolver {
   @Query(() => privateMessage, { nullable: true })
   async privateMessage(
-    @Ctx() { req }: MyContext
+    @Ctx() { payload }: MyContext
   ): Promise<privateMessage> {
     return await privateMessage.findOneOrFail({where:{
-      sentToId: { id: req.session.userId }},
+      sentToId: { id: payload!.userId }},
     });
   }
 
