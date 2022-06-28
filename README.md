@@ -35,3 +35,14 @@ D shortcut for Delete
 | Back-end  | [nodejs,express, Redis , Postgress , tyepgraphql]  |
 | front-end  | nextjs |
 
+## bottlenecks
+| apollo server V2          |     apollo server V3          |
+| --------------------------|------------------------------ |
+| (file upoload) is  
+ valnerable                | (file upload ) is not supported
+| Subscription-trasnport 
+ library is not maintaining 
+ anymore 
+to CSRF attack  | [nodejs,express, Redis , Postgress , tyepgraphql]  |
+| front-end  | nextjs |
+
