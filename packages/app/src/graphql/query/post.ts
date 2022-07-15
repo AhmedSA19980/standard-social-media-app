@@ -6,7 +6,7 @@ export const post = gql`
       id
       text
       field
-      postBelongToUser
+      
       createdAt
       comments {
         id

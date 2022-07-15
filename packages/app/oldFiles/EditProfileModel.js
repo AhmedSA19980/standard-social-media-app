@@ -7,7 +7,7 @@
 
 import { Modal } from "../../components/Model";
 import Link from 'next/link'
-import Btn from "../../common/Btn";
+import Btn from "../src/common/Btn";
 
 export default function EditProfileModel({isOpen,onRequestClose,onEdit,}){
 

@@ -1,5 +1,5 @@
 import { gql } from "apollo-boost";
-import {POST_LIST_DETAIL} from "../fragment/postDetail";
+import {POSTS_LIST} from "../fragment/postDetail";
 import { basedUserInfo } from "../fragment/BasedUserInfo";
 export const PostGraph = gql`
   mutation CreatePost($text: String!, $field: String!) {
@@ -7,10 +7,14 @@ export const PostGraph = gql`
       post {
         field
         text
-        postBelongToUser
         createdAt
         updatedAt
       }
+      author{
+        userName
+        email
+      }
+  
     
         
       

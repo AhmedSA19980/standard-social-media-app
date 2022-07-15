@@ -3,7 +3,7 @@
 */
 
 import ReactModal from 'react-modal';
-import SoildPlus from '../icons/solidPlus';
+import SoildPlus from '../src/icons/solidPlus';
 
 
 const customStyles = {

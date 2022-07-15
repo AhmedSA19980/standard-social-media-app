@@ -58,15 +58,15 @@ export const  CreatePost = () =>{
                  <div>
                    {PostsListDocument}
                    {data?.CreatePost.post?.createdAt}
-                   {data?.CreatePost.post?.postBelongToUser}
                    {data?.CreatePost.post?.field}
                    {data?.CreatePost.post?.text}
+                   <h1>postcreatedBy{data?.CreatePost.author?.userName}</h1>
                  </div>
                );
                router.push("postlist/postListPage");
                return body;
              } else if (!res.data?.CreatePost.post) {
-               alert("erro");
+               alert("error ");
              }
            }}
          >

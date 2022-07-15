@@ -4,43 +4,56 @@ import { Formik, Form, Field ,ErrorMessage} from "formik";
 import { Input } from "../common/input";
 import { Button } from "../common/Btn";
 import { gql, useMutation } from "@apollo/client";
-import { IsLoggedDocument, IsLoggedQuery, RegisterDocument, useLoginMutation } from "../generated/graphql";
+import { MeQuery, MeDocument, RegisterDocument, useLoginMutation } from "../generated/graphql";
 import { LoginGraph } from "../graphql/mutation/LoginG";
 import { json } from "stream/consumers";
 import { InputField } from "../common/InputF";
 import { ErrorMap } from "../../lib/errorMap";
 import { useRouter } from "next/router";
-
+import { setAccessToken } from "../utils/accessToken";
+import { basedUserInfo } from "../graphql/fragment/BasedUserInfo";
 
 export const SignIn = ({}) => {
   const route= useRouter()
-  const [Login, { data,loading, error }] = useLoginMutation();
+  const [login, { data,loading, error }] = useLoginMutation();
   return (
     <div>
       <Formik
         initialValues={{ userNameOrEmail: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
-          const res = await Login({
+          const res = await login({
             variables: {
               userNameOrEmail: values.userNameOrEmail,
               password: values.password,
             },
-            //refetchQueries:[{query:IsLoggedDocument}]
+            
+            update:(cache, {data})=>{
+              const user = cache.readQuery({
+                query:MeDocument
+              })
 
-            update:(cache ,{data})=>{
-              cache.writeQuery<IsLoggedQuery>({
-                query:IsLoggedDocument,
+              cache.writeQuery({
+                query:MeDocument,
                 data:{
-                  __typename:"Query",
-                  isLogged:data?.login.user
+                  login:[
+                    data?.login.user,
+                    user
+                  ]
                 }
               })
             }
-          })
-
-          if (res.data?.login.errors) {
-            setErrors(ErrorMap(res.data.login.errors));
-          }else if(res.data?.login.user){
+        
+         
+          
+         })
+          
+           if (res.data?.login.errors!) {
+            setErrors(ErrorMap(res.data!.login.errors));
+           console.log(setErrors(ErrorMap(res.data!.login.errors)));
+          }else 
+           if(res.data?.login.user && res.data?.login.accessToken){
+            
+                setAccessToken(res.data.login.accessToken);
                 route.push("/")
           }
         }}
@@ -71,7 +84,9 @@ export const SignIn = ({}) => {
               type="submit"
               value={"submit"}
               loading={isSubmitting}
-            ></Button>
+            >
+              
+            </Button>
           </Form>
         )}
       </Formik>

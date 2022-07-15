@@ -1,6 +1,6 @@
 import React from "react";
 import GenericNotification from "./GenericNotification";
-import Btn from "../../common/Btn";
+import Btn from "../src/common/Btn";
 
 //* notificate new post to users
 

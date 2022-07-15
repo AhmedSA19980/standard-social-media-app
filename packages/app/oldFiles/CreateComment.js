@@ -1,6 +1,6 @@
 import React,{useState,useEffect} from "react";
-import { Input } from "../../common/input";
-import Btn from "../../common/Btn";
+import { Input } from "../src/common/input";
+import Btn from "../src/common/Btn";
 
 
 

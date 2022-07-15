@@ -1,6 +1,6 @@
 import React,{ useReducer,useRef,useEffect, createRef } from "react";
-import {Input} from "../../common/input";
-import Btn from "../../common/Btn";
+import {Input} from "../src/common/input";
+import Btn from "../src/common/Btn";
 import styles from '../../styles/Home.module.css'
 import TextField from "../../common/textArea";
 //import { createCase } from "../../lib/createCase";

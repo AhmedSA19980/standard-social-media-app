@@ -1,6 +1,6 @@
 import React from "react";
-import GenericNotification from "./GenericNotification";
-import Btn from "../../common/Btn";
+import GenericNotification from "../src/components/Notificationelement/GenericNotification";
+import Btn from "../src/common/Btn";
 
 //* show user data 
 //* we need to create user comonent

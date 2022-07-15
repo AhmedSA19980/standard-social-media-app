@@ -1,6 +1,6 @@
-import Input from "../common/input"
-import Btn from "../common/Btn"
-import {LoginHelper} from '../common/LoginHelper'
+import Input from "../src/common/input"
+import Btn from "../src/common/Btn"
+import {LoginHelper} from './LoginHelper'
 import { useReducer,useRef,useEffect } from "react"
 
 

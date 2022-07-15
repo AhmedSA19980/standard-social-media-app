@@ -9,15 +9,11 @@ import {
   useQuery,
   gql
 } from "@apollo/client";
-import { useApollo } from '../../lib/apolloClient';
+//import { createApolloClient } from '../../lib/apolloClient';
+//import { useApollo } from '../../lib/apolloClient';
 const url = "http:localhost:4000/graphql"
 const io = "https://48p1r2roz4.sse.codesandbox.io"
-
-const client = new ApolloClient({
-  uri: "http:localhost:4000/graphql",
-  cache: new InMemoryCache(),
-});
-
+import {useApollo} from "../utils/createWithApollo"
 
 function MyApp( {Component, pageProps }:AppProps) {
   const apolloClient = useApollo(pageProps)
@@ -30,3 +26,6 @@ function MyApp( {Component, pageProps }:AppProps) {
 }
 
 export default MyApp
+
+
+// how ot set apolo cient with jwt

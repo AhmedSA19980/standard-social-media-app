@@ -3,7 +3,7 @@ import { usePostQuery, PostQuery } from "../../generated/graphql";
 
 export const Post =()=>{
 
-    const {data , loading , error} = usePostQuery({variables:{id:"1"}})
+    const {data , loading , error} = usePostQuery({})
        let body = null
       if(loading){
           return (
@@ -16,8 +16,8 @@ export const Post =()=>{
              <>
                <h1>{data.post.id}</h1>
                <p>{data.post.text}</p>
-               <h1>{data.post.likes}</h1>
-               <h1>{data.post.postBelongToUser}</h1>
+               <h1>{data.post.createdAt}</h1>
+               <h1>all post{data.post}</h1>
                <h1></h1>
              </>
            );

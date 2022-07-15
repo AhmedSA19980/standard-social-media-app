@@ -16,10 +16,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any;
-  /** The `Upload` scalar type represents a file upload. */
-  Upload: any;
 };
 
 export type AddCommentInput = {
@@ -30,15 +27,18 @@ export type AddCommentInput = {
 export type Comment = {
   __typename?: 'Comment';
   author: User;
-  authorId: Scalars['Float'];
+  authorId: Scalars['String'];
+  createdAt: Scalars['DateTime'];
   getpost: Post;
   id: Scalars['ID'];
+  postId: Scalars['String'];
+  user: User;
   writeAComment: Scalars['String'];
 };
 
 export type EditPostInput = {
   field: Scalars['String'];
-  postId: Scalars['Int'];
+  postId: Scalars['ID'];
   text?: InputMaybe<Scalars['String']>;
 };
 
@@ -48,16 +48,25 @@ export type FieldError = {
   Message: Scalars['String'];
 };
 
+export type FollowData = {
+  __typename?: 'FollowData';
+  followers: Array<User>;
+  followings: Array<User>;
+};
+
+export enum Gender {
+  Female = 'Female',
+  Male = 'Male'
+}
+
 export type Mutation = {
   __typename?: 'Mutation';
   CreatePost: PostMutationResponse;
   DeletePost: Scalars['Boolean'];
-  addPictureProfile: Scalars['Boolean'];
   changePassword: UserResponse;
   confirmedUser: Scalars['Boolean'];
   createComment: Comment;
   deleteComment: Scalars['Boolean'];
-  deleteProfilePicture: Scalars['Boolean'];
   editComment: Comment;
   editPost: Post;
   editProfile: Profile;
@@ -65,7 +74,10 @@ export type Mutation = {
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
+  revokeRefreshTokensForUser: Scalars['Boolean'];
   sendPrivateMessage: PrivateMessage;
+  toggleFollow: Scalars['Boolean'];
+  toggleLike: Scalars['Boolean'];
 };
 
 
@@ -76,11 +88,6 @@ export type MutationCreatePostArgs = {
 
 export type MutationDeletePostArgs = {
   id: Scalars['Int'];
-};
-
-
-export type MutationAddPictureProfileArgs = {
-  picture: Scalars['Upload'];
 };
 
 
@@ -136,23 +143,49 @@ export type MutationRegisterArgs = {
 };
 
 
+export type MutationRevokeRefreshTokensForUserArgs = {
+  userId: Scalars['String'];
+};
+
+
 export type MutationSendPrivateMessageArgs = {
   data: PrivateMsgInput;
 };
 
+
+export type MutationToggleFollowArgs = {
+  followingUserId: Scalars['ID'];
+};
+
+
+export type MutationToggleLikeArgs = {
+  postId: Scalars['String'];
+};
+
 export type Post = {
   __typename?: 'Post';
+  author: User;
+  commentCount: Scalars['Float'];
   comments?: Maybe<Array<Comment>>;
   createdAt: Scalars['DateTime'];
   field: Scalars['String'];
   id: Scalars['ID'];
-  postBelongToUser: Scalars['Float'];
+  likeCount: Scalars['Float'];
+  postOwner: Scalars['ID'];
   text: Scalars['String'];
   updatedAt: Scalars['DateTime'];
+  userLike: Scalars['Boolean'];
+};
+
+export type PostInput = {
+  field: Scalars['String'];
+  text: Scalars['String'];
 };
 
 export type PostMutationResponse = {
   __typename?: 'PostMutationResponse';
+  author?: Maybe<User>;
+  errors?: Maybe<Array<FieldError>>;
   post?: Maybe<Post>;
 };
 
@@ -161,16 +194,20 @@ export type Profile = {
   bio: Scalars['String'];
   gender: Scalars['String'];
   id: Scalars['ID'];
+  profile: Profile;
+  profileOwner: Scalars['ID'];
   profilePicture: Scalars['String'];
-  user: Array<User>;
+  user: User;
 };
 
 export type Query = {
   __typename?: 'Query';
+  bye: Scalars['String'];
   comments: Array<Comment>;
-  isLogged?: Maybe<User>;
+  commnets: Scalars['String'];
+  getFollows?: Maybe<FollowData>;
+  me?: Maybe<User>;
   post?: Maybe<Post>;
-  postB?: Maybe<Post>;
   posts?: Maybe<Array<Post>>;
   privateMessage?: Maybe<PrivateMessage>;
   userProfile: Profile;
@@ -178,22 +215,13 @@ export type Query = {
 };
 
 
+export type QueryGetFollowsArgs = {
+  userId: Scalars['String'];
+};
+
+
 export type QueryPostArgs = {
   postId: Scalars['Float'];
-};
-
-
-export type QueryPostBArgs = {
-  postId: Scalars['Float'];
-};
-
-
-export type QueryPostsArgs = {
-  first?: InputMaybe<Scalars['Int']>;
-  name?: InputMaybe<Scalars['String']>;
-  orderBy?: InputMaybe<Scalars['String']>;
-  postId?: InputMaybe<Scalars['Int']>;
-  skip?: InputMaybe<Scalars['Int']>;
 };
 
 export type Subscription = {
@@ -204,7 +232,7 @@ export type Subscription = {
 
 
 export type SubscriptionNewMessageArgs = {
-  postId: Scalars['ID'];
+  postId: Scalars['String'];
 };
 
 
@@ -214,15 +242,17 @@ export type SubscriptionNewPirvateMessageArgs = {
 
 export type UpdateProfileInput = {
   bio: Scalars['String'];
-  gender: Scalars['String'];
+  gender?: InputMaybe<Gender>;
 };
 
 export type User = {
   __typename?: 'User';
-  Profile: Array<Profile>;
+  Profile: Profile;
   allUserPosts: Array<Post>;
+  confirmed: Scalars['Boolean'];
   email: Scalars['String'];
   forgotPasswordLocked: Scalars['Boolean'];
+  gender: Scalars['String'];
   id: Scalars['ID'];
   isActive: Scalars['Boolean'];
   privateMessages: Array<PrivateMessage>;
@@ -247,40 +277,37 @@ export type EditCommentInput = {
   editComment: Scalars['String'];
 };
 
-export type PostInput = {
-  field: Scalars['String'];
-  text: Scalars['String'];
-};
-
 export type PrivateMessage = {
   __typename?: 'privateMessage';
   body: Scalars['String'];
   createdAt: Scalars['DateTime'];
   id: Scalars['ID'];
   sentBy: User;
-  sentById: Scalars['Float'];
+  sentById: Scalars['String'];
   sentTo: User;
-  sentToId: Scalars['Float'];
+  sentToId: Scalars['String'];
   updatedAt: Scalars['DateTime'];
   userMessages: UserMessage;
 };
 
 export type PrivateMsgInput = {
   body: Scalars['String'];
-  userId: Scalars['Int'];
+  recieveUserId: Scalars['String'];
 };
 
 export type UserResponse = {
   __typename?: 'userResponse';
+  accessToken: Scalars['String'];
   errors?: Maybe<Array<FieldError>>;
+  profile?: Maybe<Profile>;
   user?: Maybe<User>;
 };
 
 export type BasedUserInfoFragment = { __typename?: 'User', id: string, userName: string, email: string };
 
-export type CommentListFragment = { __typename?: 'Comment', id: string, writeAComment: string, authorId: number };
+export type CommentListFragment = { __typename?: 'Comment', id: string, writeAComment: string, authorId: string };
 
-export type PostListDetailFragment = { __typename?: 'Post', field: string, text: string, postBelongToUser: number, createdAt: any, updatedAt: any };
+export type PostsListFragment = { __typename?: 'Post', id: string, postOwner: string, field: string, text: string, userLike: boolean, likeCount: number, commentCount: number, createdAt: any, updatedAt: any, comments?: Array<{ __typename?: 'Comment', id: string, writeAComment: string, authorId: string, createdAt: any, user: { __typename?: 'User', userName: string, email: string } }> | null, author: { __typename?: 'User', id: string, userName: string, email: string } };
 
 export type LoginMutationVariables = Exact<{
   userNameOrEmail: Scalars['String'];
@@ -288,7 +315,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'userResponse', errors?: Array<{ __typename?: 'FieldError', Field: string, Message: string }> | null, user?: { __typename?: 'User', id: string, userName: string, email: string } | null } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'userResponse', accessToken: string, errors?: Array<{ __typename?: 'FieldError', Field: string, Message: string }> | null, user?: { __typename?: 'User', id: string, userName: string, email: string } | null } };
 
 export type RegisterMutationVariables = Exact<{
   userName: Scalars['String'];
@@ -305,7 +332,7 @@ export type AddCommentMutationVariables = Exact<{
 }>;
 
 
-export type AddCommentMutation = { __typename?: 'Mutation', createComment: { __typename?: 'Comment', getpost: { __typename?: 'Post', postBelongToUser: number, field: string, text: string, createdAt: any, updatedAt: any, comments?: Array<{ __typename?: 'Comment', authorId: number, writeAComment: string }> | null } } };
+export type AddCommentMutation = { __typename?: 'Mutation', createComment: { __typename?: 'Comment', getpost: { __typename?: 'Post', field: string, text: string, createdAt: any, updatedAt: any, comments?: Array<{ __typename?: 'Comment', authorId: string, writeAComment: string }> | null } } };
 
 export type CreatePostMutationVariables = Exact<{
   text: Scalars['String'];
@@ -313,29 +340,29 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', CreatePost: { __typename?: 'PostMutationResponse', post?: { __typename?: 'Post', field: string, text: string, postBelongToUser: number, createdAt: any, updatedAt: any } | null } };
+export type CreatePostMutation = { __typename?: 'Mutation', CreatePost: { __typename?: 'PostMutationResponse', post?: { __typename?: 'Post', field: string, text: string, createdAt: any, updatedAt: any } | null, author?: { __typename?: 'User', userName: string, email: string } | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 
-export type IsLoggedQueryVariables = Exact<{ [key: string]: never; }>;
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type IsLoggedQuery = { __typename?: 'Query', isLogged?: { __typename?: 'User', id: string, userName: string, email: string } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, userName: string, email: string } | null };
 
 export type PostQueryVariables = Exact<{
   id: Scalars['Float'];
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: string, text: string, field: string, postBelongToUser: number, createdAt: any, comments?: Array<{ __typename?: 'Comment', id: string, writeAComment: string, authorId: number }> | null } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: string, text: string, field: string, createdAt: any, comments?: Array<{ __typename?: 'Comment', id: string, writeAComment: string, authorId: string }> | null } | null };
 
 export type PostsListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsListQuery = { __typename?: 'Query', posts?: Array<{ __typename?: 'Post', id: string, createdAt: any, field: string, text: string, postBelongToUser: number, comments?: Array<{ __typename?: 'Comment', id: string, writeAComment: string, authorId: number }> | null }> | null };
+export type PostsListQuery = { __typename?: 'Query', posts?: Array<{ __typename?: 'Post', id: string, postOwner: string, field: string, text: string, userLike: boolean, likeCount: number, commentCount: number, createdAt: any, updatedAt: any, comments?: Array<{ __typename?: 'Comment', id: string, writeAComment: string, authorId: string, createdAt: any, user: { __typename?: 'User', userName: string, email: string } }> | null, author: { __typename?: 'User', id: string, userName: string, email: string } }> | null };
 
 export type UserProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -356,18 +383,38 @@ export const CommentListFragmentDoc = gql`
   authorId
 }
     `;
-export const PostListDetailFragmentDoc = gql`
-    fragment PostListDetail on Post {
+export const PostsListFragmentDoc = gql`
+    fragment PostsList on Post {
+  id
+  postOwner
   field
   text
-  postBelongToUser
+  userLike
+  likeCount
+  commentCount
   createdAt
   updatedAt
+  comments {
+    id
+    writeAComment
+    authorId
+    createdAt
+    user {
+      userName
+      email
+    }
+  }
+  author {
+    id
+    userName
+    email
+  }
 }
     `;
 export const LoginDocument = gql`
     mutation Login($userNameOrEmail: String!, $password: String!) {
   login(userNameOrEmail: $userNameOrEmail, password: $password) {
+    accessToken
     errors {
       Field
       Message
@@ -462,7 +509,6 @@ export const AddCommentDocument = gql`
     mutation AddComment($writeAComment: String!, $postId: ID!) {
   createComment(option: {writeAComment: $writeAComment, postId: $postId}) {
     getpost {
-      postBelongToUser
       field
       text
       createdAt
@@ -514,9 +560,12 @@ export const CreatePostDocument = gql`
     post {
       field
       text
-      postBelongToUser
       createdAt
       updatedAt
+    }
+    author {
+      userName
+      email
     }
   }
 }
@@ -590,53 +639,52 @@ export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<Logou
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
 export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
-export const IsLoggedDocument = gql`
-    query isLogged {
-  isLogged {
+export const MeDocument = gql`
+    query me {
+  me {
     ...basedUserInfo
   }
 }
     ${BasedUserInfoFragmentDoc}`;
-export type IsLoggedComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IsLoggedQuery, IsLoggedQueryVariables>, 'query'>;
+export type MeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<MeQuery, MeQueryVariables>, 'query'>;
 
-    export const IsLoggedComponent = (props: IsLoggedComponentProps) => (
-      <ApolloReactComponents.Query<IsLoggedQuery, IsLoggedQueryVariables> query={IsLoggedDocument} {...props} />
+    export const MeComponent = (props: MeComponentProps) => (
+      <ApolloReactComponents.Query<MeQuery, MeQueryVariables> query={MeDocument} {...props} />
     );
     
 
 /**
- * __useIsLoggedQuery__
+ * __useMeQuery__
  *
- * To run a query within a React component, call `useIsLoggedQuery` and pass it any options that fit your needs.
- * When your component renders, `useIsLoggedQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useIsLoggedQuery({
+ * const { data, loading, error } = useMeQuery({
  *   variables: {
  *   },
  * });
  */
-export function useIsLoggedQuery(baseOptions?: Apollo.QueryHookOptions<IsLoggedQuery, IsLoggedQueryVariables>) {
+export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<IsLoggedQuery, IsLoggedQueryVariables>(IsLoggedDocument, options);
+        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
       }
-export function useIsLoggedLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IsLoggedQuery, IsLoggedQueryVariables>) {
+export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<IsLoggedQuery, IsLoggedQueryVariables>(IsLoggedDocument, options);
+          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
         }
-export type IsLoggedQueryHookResult = ReturnType<typeof useIsLoggedQuery>;
-export type IsLoggedLazyQueryHookResult = ReturnType<typeof useIsLoggedLazyQuery>;
-export type IsLoggedQueryResult = Apollo.QueryResult<IsLoggedQuery, IsLoggedQueryVariables>;
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const PostDocument = gql`
     query Post($id: Float!) {
   post(postId: $id) {
     id
     text
     field
-    postBelongToUser
     createdAt
     comments {
       id
@@ -683,20 +731,10 @@ export type PostQueryResult = Apollo.QueryResult<PostQuery, PostQueryVariables>;
 export const PostsListDocument = gql`
     query PostsList {
   posts {
-    id
-    createdAt
-    field
-    text
-    createdAt
-    postBelongToUser
-    comments {
-      id
-      writeAComment
-      authorId
-    }
+    ...PostsList
   }
 }
-    `;
+    ${PostsListFragmentDoc}`;
 export type PostsListComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PostsListQuery, PostsListQueryVariables>, 'query'>;
 
     export const PostsListComponent = (props: PostsListComponentProps) => (

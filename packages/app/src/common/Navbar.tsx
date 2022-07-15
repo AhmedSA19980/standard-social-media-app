@@ -2,10 +2,11 @@
 import React from "react";
 import  NextLink  from "next/link";
 import classNames from "classnames";
-import { IsLoggedComponent, IsLoggedDocument, IsLoggedQuery, 
+import { MeComponent, MeDocument, 
+   
   LoginDocument, 
   LogoutComponent, LogoutDocument,
-   useIsLoggedQuery } from "../generated/graphql";
+   useMeQuery,MeQuery} from "../generated/graphql";
 
 import { useLogoutMutation } from "../generated/graphql";
 import { useApolloClient } from "@apollo/client";
@@ -14,6 +15,9 @@ import { ApolloClient } from "apollo-boost";
 import { logOutGraph } from "../graphql/mutation/logout";
 import { Button } from "../common/Btn";
 import { useRouter } from "next/router";
+import App from "next/app";
+import { setAccessToken } from "../utils/accessToken";
+import { update } from "react-spring";
 
 
 // eslint-disable-next-line react/display-name
@@ -41,9 +45,14 @@ import { useRouter } from "next/router";
 interface NavBarProps {}
 export const Navbar =()=>{
   const route  =useRouter()
-
-  const [logout, { client ,loading:f }] = useLogoutMutation();
-    const {data,loading, error, } = useIsLoggedQuery()
+  const { data, error } = useMeQuery()
+  const [logout, { client, loading }] = 
+  useLogoutMutation({
+       fetchPolicy: "network-only",
+       
+        
+       
+     });
  // const apolloClient = useApolloClient();
     let body = null
      
@@ -57,27 +66,40 @@ export const Navbar =()=>{
         );
     }
     
-    else if (data?.isLogged?.userName) {
+     if (data?.me?.id) {
       body = (
         <div>
+          <li>
+            <NextLink href={"/post/CreatePost"}>
+              <h3 style={{ cursor: "pointer" }}>createPost</h3>
+            </NextLink>
+          </li>
+          <h3 style={{ textAlign: "center" }}>user:{data.me.userName}</h3>
           <h3 style={{ textAlign: "center" }}>
-            user:{data.isLogged.userName}</h3>
+            user:
+            {data.me.email}
+          </h3>
           <Button
             onClick={async () => {
-              await logout();
+              logout() 
+              client.resetStore()
+               localStorage.clear()
+               
+
+              /* await logout()
               await client.resetStore();
-              await route.push("/");
-
+              await route.push("/loginPage");
+              */
               // await apolloClient.resetStore();
-
               //window.location.reload()
             }}
             //loading={data}
             value={"logout"}
           ></Button>
+          {logout}
         </div>
       );
-    }else {
+    }else if(!data?.me) {
       body = (
         <div>
           <NextLink href={"/registerPage"}>
@@ -89,15 +111,12 @@ export const Navbar =()=>{
         </div>
       );
 
-      }
+    }
+    
     return (
       <div>
         navbar
-        {body}
+        {body }
       </div>
     );
-}
-
-function useUserQuery(): any[] {
-    throw new Error("Function not implemented.");
 }

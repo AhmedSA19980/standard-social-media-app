@@ -29,7 +29,7 @@ export const  Home = () =>{
         </h1>
          </main>*/}
       
-       <CreatePost />
+      
 
       <footer className={styles.footer}>
         {/*<a
