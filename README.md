@@ -35,7 +35,7 @@ D shortcut for Delete
 | Back-end  | [nodejs,express, Redis , Postgress , tyepgraphql]  |
 | front-end  | nextjs |
 
-## bottlenecks
+## bottlenecks(back-end)
 | apollo server V2                   |     apollo server V3          |
 | ---------------------------------- |------------------------------ |
 | (file upoload) is valnerable to | (file upload ) is not supported
@@ -47,3 +47,7 @@ D shortcut for Delete
 # future Solution
 1- build file upload api
 2- add another file upload api "add more cost"
+
+
+## bottlenecks(front-end)
+1- after mutation user data appear successfuly , then on reload the page (data) is lost 
