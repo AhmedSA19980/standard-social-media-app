@@ -51,3 +51,4 @@ D shortcut for Delete
 
 ## bottlenecks(front-end)
 1- after mutation user data appear successfuly , then on reload the page (data) is lost 
+2-serverside-render 
